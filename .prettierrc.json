@@ -1,0 +1,28 @@
+{
+    "printWidth": 100,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "overrides": [
+        {
+            "files": [
+                "**/*.js",
+                "**/*.jsx",
+                "**/*.mjs",
+                "**/*.cjs",
+                "**/*.ts",
+                "**/*.tsx",
+                "**/*.mts",
+                "**/*.cts",
+                "**/*.css",
+                "**/*.scss",
+                "**/*.sass",
+                "**/*.less",
+                "**/*.vue"
+            ],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}

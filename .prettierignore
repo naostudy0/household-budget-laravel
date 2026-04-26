@@ -1,0 +1,11 @@
+/vendor
+/node_modules
+/storage
+/bootstrap/cache
+/public/build
+
+*.lock
+.coderabbit.yaml
+composer.lock
+herd.yml
+package-lock.json
