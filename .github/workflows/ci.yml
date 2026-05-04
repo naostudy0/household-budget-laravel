@@ -62,21 +62,17 @@ jobs:
       - name: Copy environment file
         run: cp .env.example .env
 
-      - name: Generate application key
-        run: php artisan key:generate
-
-      - name: Set up environment variables
+      - name: Setup testing environment
         run: |
-          echo "APP_ENV=testing" >> .env
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=life_ledger_testing" >> .env
-          echo "DB_USERNAME=test_user" >> .env
-          echo "DB_PASSWORD=test_password" >> .env
+          cp .env.testing.example .env.testing
+          sed -i "s/DB_USERNAME=.*/DB_USERNAME=test_user/" .env.testing
+          sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=test_password/" .env.testing
+
+      - name: Generate application key
+        run: php artisan key:generate --env=testing
 
       - name: Run database migrations
-        run: php artisan migrate --force
+        run: php artisan migrate --env=testing --force
 
       - name: Check PHP code formatting
         run: ./vendor/bin/pint --test
