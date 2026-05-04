@@ -5,7 +5,8 @@
 /public/build
 
 *.lock
-.coderabbit.yaml
+*.md
+*.yml
+*.yaml
 composer.lock
-herd.yml
 package-lock.json
