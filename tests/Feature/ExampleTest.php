@@ -1,7 +1,9 @@
 <?php
 
-it('returns a successful response', function () {
-    $response = $this->get('/');
+use Inertia\Testing\AssertableInertia as Assert;
 
-    $response->assertStatus(200);
+it('returns a successful response', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Top')->has('errors'));
 });

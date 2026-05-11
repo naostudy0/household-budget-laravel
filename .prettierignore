@@ -3,6 +3,7 @@
 /storage
 /bootstrap/cache
 /public/build
+/.claude
 
 *.lock
 *.md
