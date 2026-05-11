@@ -1,8 +1,12 @@
+# AI作業メモ（コンテキスト引き継ぎ用）
+/ai-notes/
+
 *.log
 .DS_Store
 .env
 .env.backup
 .env.production
+.env.testing
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -17,6 +21,7 @@
 /public/build
 /public/hot
 /public/storage
+/coverage
 /storage/*.key
 /storage/pail
 /vendor

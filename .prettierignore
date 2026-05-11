@@ -1,0 +1,14 @@
+/vendor
+/node_modules
+/storage
+/bootstrap/cache
+/public/build
+/.claude
+/coverage
+
+*.lock
+*.md
+*.yml
+*.yaml
+composer.lock
+package-lock.json

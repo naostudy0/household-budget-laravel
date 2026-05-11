@@ -1,19 +1,10 @@
 <?php
 
-namespace Tests\Feature;
+use Inertia\Testing\AssertableInertia as Assert;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-}
+// TODO: pestの確認のためのテストコード。後で削除する。
+it('returns a successful response', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Top', false)->has('errors'));
+});
