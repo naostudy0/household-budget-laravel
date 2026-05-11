@@ -4,6 +4,7 @@
 /bootstrap/cache
 /public/build
 /.claude
+/coverage
 
 *.lock
 *.md

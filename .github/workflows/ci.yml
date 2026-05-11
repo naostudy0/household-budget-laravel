@@ -81,6 +81,8 @@ jobs:
         run: npm run format:check
 
       - name: Run tests with coverage
+        env:
+          XDEBUG_MODE: coverage
         run: |
           mkdir -p coverage
           ./vendor/bin/pest --coverage --coverage-clover=coverage/clover.xml --coverage-html=coverage/html --coverage-text=coverage/coverage.txt
