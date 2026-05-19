@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('ユーザー登録画面を表示できる', function () {
@@ -20,8 +22,12 @@ it('POST /register でユーザーが作成され /dashboard へリダイレク�
         'name' => 'テストユーザー',
         'email' => 'test@example.com',
     ]);
+    $user = User::where('email', 'test@example.com')->first();
+    expect($user->password)->not->toBe('password')
+        ->and(Hash::check('password', $user->password))
+        ->toBeTrue();
 
-    $this->assertAuthenticated();
+    $this->assertAuthenticatedAs($user);
 });
 
 it('登録に成功するとセッションIDが再生成される', function () {

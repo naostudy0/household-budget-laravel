@@ -2,12 +2,8 @@
 
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Tests\TestCase;
-
-uses(TestCase::class, RefreshDatabase::class);
 
 function validRegisterInput(array $overrides = []): array
 {

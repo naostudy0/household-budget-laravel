@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Tests\TestCase;
-
-uses(TestCase::class);
 
 function validLoginInput(array $overrides = []): array
 {
