@@ -1,6 +1,9 @@
 # AI作業メモ（コンテキスト引き継ぎ用）
 /ai-notes/
 
+# Claude Code ローカル設定（個人用）
+.claude/settings.local.json
+
 *.log
 .DS_Store
 .env

@@ -57,6 +57,9 @@ php artisan test
 # 対象テストのみ実行
 php artisan test --filter=TestName
 
+# カバレッジ測定（coverage/ にHTML出力）
+php artisan test --coverage-html coverage
+
 # マイグレーション
 php artisan migrate
 
@@ -119,8 +122,9 @@ routes/
   api.php                    # 外部連携や純粋なJSON APIが必要な場合のみ使用
 
 tests/
-  Unit/                      # 単体テスト（主にDomain層）
-  Feature/                   # 機能テスト（UseCase〜HTTP）
+  Unit/                      # ユニットテスト（ロジック単体）
+  Integration/               # 統合テスト（実クラスを組み合わせてテスト）
+  Feature/                   # フィーチャーテスト（HTTP振る舞いテスト）
 
 ai-notes/                    # AI作業メモ（gitignore済み）
 ```
@@ -414,36 +418,36 @@ Red確認時は対象テストのみ実行してよい。
 
 ---
 
-## テストの優先順位
+## テストピラミッド
 
-1. **Domain 層の Entity / Value Object**
-   - 外部依存なし
-   - 高速
-   - 最重要
-
-2. **Application 層の UseCase**
-   - InMemory Repository を使ってテストする
-   - 業務フローを確認する
-
-3. **Http 層の Feature Test**
-   - DB を使った統合テスト
-   - Controller / Request / Inertia レスポンスを確認する
-
-4. **Vue / Inertia 周辺**
-   - ページ名
-   - props
-   - フォーム送信後のリダイレクト
-   - バリデーションエラー
+このプロジェクトはテストピラミッドの考え方に基づき、Unit / Integration / Feature の3種類のテストを使い分ける。
 
 ---
 
-## テストの書き方
+## 書くべきテストの判断基準
 
-### Domain 層：ユニットテスト
+対象クラスの特徴に応じて、以下の通り書くテストの種類を決める。
 
-Eloquent を使用しない。
+| 対象クラスの特徴                                  | Unit | Integration | Feature |
+|--------------------------------------------------|:----:|:-----------:|:-------:|
+| ロジックのみ（外部クラス呼び出しなし）            |  ✓   |             |         |
+| ロジックあり ＋ 他クラスを呼び出している          |  ✓   |      ✓      |         |
+| 他クラスを呼び出すだけ（ロジックなし）            |      |      ✓      |         |
+| HTTPリクエストのエンドポイントである              |      |             |    ✓    |
 
-外部依存を持たない。
+---
+
+## Unit テスト
+
+ロジックそのものをテストする。
+
+他クラスへの呼び出しはモックする。
+
+外部依存（DB・メール・外部APIなど）を持たない。
+
+```text
+tests/Unit/
+```
 
 ```php
 it('金額が負の値の場合は例外を投げる', function () {
@@ -454,14 +458,22 @@ it('金額が負の値の場合は例外を投げる', function () {
 
 ---
 
-### Application 層：ユースケーステスト
+## Integration テスト
 
-UseCase は InMemory Repository を使ってテストしてよい。
+実際のコラボレーター（他クラス）を組み合わせてテストする。
+
+モックは使わない。ただし、メール送信・外部API・外部ツールとの連携など、外部サービスへの副作用が伴うものはモックしてよい。
+
+```text
+tests/Integration/
+```
+
+UseCase のテストは原則として Integration テストに書く。
 
 ```php
 it('会計を作成するとIDが払い出される', function () {
     $useCase = new CreateAccountUseCase(
-        new InMemoryAccountRepository()
+        new EloquentAccountRepository()
     );
 
     $result = $useCase->execute(new CreateAccountInput(
@@ -475,29 +487,26 @@ it('会計を作成するとIDが払い出される', function () {
 
 ---
 
-### Http 層：Feature Test
+## Feature テスト
 
-Inertia画面の通常操作は `routes/web.php` を対象にする。
+HTTPリクエストを起点にした振る舞いをテストする。
+
+`$this->get` / `$this->post` などを使い、エンドポイントの振る舞いを確認する。
+
+```text
+tests/Feature/
+```
 
 ```php
 it('POST /accounts で会計が作成される', function () {
-    $response = $this->post('/accounts', [
-        'name' => '個人用',
-    ]);
+    $this->post('/accounts', ['name' => '個人用'])
+        ->assertRedirect();
 
-    $response->assertRedirect();
-
-    $this->assertDatabaseHas('accounts', [
-        'name' => '個人用',
-    ]);
+    $this->assertDatabaseHas('accounts', ['name' => '個人用']);
 });
 ```
 
----
-
-### Inertia のテスト
-
-Inertiaページを返すControllerでは、可能な範囲で Inertia レスポンスのページ名とpropsを検証する。
+Inertiaページを返すエンドポイントでは、ページ名とpropsも検証する。
 
 ```php
 use Inertia\Testing\AssertableInertia as Assert;
