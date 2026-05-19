@@ -9,7 +9,7 @@ const model = defineModel({
 const input = ref(null);
 
 onMounted(() => {
-  if (input.value.hasAttribute('autofocus')) {
+  if (input.value && input.value.hasAttribute('autofocus')) {
     input.value.focus();
   }
 });

@@ -30,6 +30,8 @@ class RegisteredUserController extends Controller
         ));
 
         Auth::loginUsingId($result->userId);
+        $request->session()->regenerate();
+
         event(new Registered(Auth::user()));
 
         return redirect(route('dashboard'));

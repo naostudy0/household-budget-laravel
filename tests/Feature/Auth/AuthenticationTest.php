@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('ログイン画面を表示できる', function () {
@@ -78,7 +78,10 @@ it('ログインに成功するとレートリミットのカウントがリセ�
         'password' => 'password',
     ])->assertRedirect(route('dashboard', absolute: false));
 
-    $throttleKey = Str::transliterate(Str::lower($user->email).'|127.0.0.1');
+    $throttleKey = LoginRequest::create(route('login', absolute: false), 'POST', [
+        'email' => $user->email,
+    ])->throttleKey();
+
     expect(RateLimiter::attempts($throttleKey))->toBe(0);
 });
 
