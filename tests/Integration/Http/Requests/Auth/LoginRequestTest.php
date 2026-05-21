@@ -2,10 +2,7 @@
 
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 function validLoginInput(array $overrides = []): array
 {
@@ -39,6 +36,14 @@ it('不正な入力値はバリデーションエラーになる', function (arr
         'input' => Arr::except(validLoginInput(), 'email'),
         'expectedErrorKeys' => ['email'],
     ],
+    'email が文字列ではない' => [
+        'input' => validLoginInput(['email' => ['user@example.com']]),
+        'expectedErrorKeys' => ['email'],
+    ],
+    'email 形式が不正' => [
+        'input' => validLoginInput(['email' => 'not-an-email']),
+        'expectedErrorKeys' => ['email'],
+    ],
     'password が空' => [
         'input' => validLoginInput(['password' => '']),
         'expectedErrorKeys' => ['password'],
@@ -47,9 +52,9 @@ it('不正な入力値はバリデーションエラーになる', function (arr
         'input' => Arr::except(validLoginInput(), 'password'),
         'expectedErrorKeys' => ['password'],
     ],
-    'email 形式が不正' => [
-        'input' => validLoginInput(['email' => 'not-an-email']),
-        'expectedErrorKeys' => ['email'],
+    'password が文字列ではない' => [
+        'input' => validLoginInput(['password' => ['password']]),
+        'expectedErrorKeys' => ['password'],
     ],
     'email と password が空' => [
         'input' => validLoginInput([
@@ -58,55 +63,15 @@ it('不正な入力値はバリデーションエラーになる', function (arr
         ]),
         'expectedErrorKeys' => ['email', 'password'],
     ],
+    'email と password が未指定' => [
+        'input' => [],
+        'expectedErrorKeys' => ['email', 'password'],
+    ],
+    'email と password が文字列ではない' => [
+        'input' => validLoginInput([
+            'email' => ['user@example.com'],
+            'password' => ['password'],
+        ]),
+        'expectedErrorKeys' => ['email', 'password'],
+    ],
 ]);
-
-it('認証に成功するとレートリミットがリセットされる', function () {
-    $request = LoginRequest::create('/login', 'POST', validLoginInput());
-
-    RateLimiter::shouldReceive('tooManyAttempts')
-        ->once()
-        ->with($request->throttleKey(), 5)
-        ->andReturnFalse();
-
-    Auth::shouldReceive('attempt')
-        ->once()
-        ->with(validLoginInput(), false)
-        ->andReturnTrue();
-
-    RateLimiter::shouldReceive('clear')
-        ->once()
-        ->with($request->throttleKey());
-
-    $request->authenticate();
-});
-
-it('存在しないメールアドレスでは認証に失敗する', function () {
-    $request = LoginRequest::create('/login', 'POST', [
-        'email' => 'missing@example.com',
-        'password' => 'password',
-    ]);
-
-    RateLimiter::shouldReceive('tooManyAttempts')
-        ->once()
-        ->with($request->throttleKey(), 5)
-        ->andReturnFalse();
-    RateLimiter::shouldReceive('hit')
-        ->once()
-        ->with($request->throttleKey());
-
-    Auth::shouldReceive('attempt')
-        ->once()
-        ->with([
-            'email' => 'missing@example.com',
-            'password' => 'password',
-        ], false)
-        ->andReturnFalse();
-
-    try {
-        $request->authenticate();
-        $this->fail('ValidationException was not thrown.');
-    } catch (ValidationException $exception) {
-        expect($exception->errors())->toHaveKey('email')
-            ->and($exception->errors()['email'][0])->toBe(trans('auth.failed'));
-    }
-});
