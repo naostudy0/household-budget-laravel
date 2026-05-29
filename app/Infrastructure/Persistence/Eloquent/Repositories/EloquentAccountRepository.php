@@ -22,4 +22,20 @@ class EloquentAccountRepository implements AccountRepositoryInterface
             'account_uuid' => $account->account_uuid,
         ];
     }
+
+    /**
+     * @return array<int, array{account_uuid: string, name: string}>
+     */
+    public function findSummariesByUserId(int $userId): array
+    {
+        return Account::query()
+            ->where('user_id', $userId)
+            ->orderBy('account_id')
+            ->get(['account_uuid', 'name'])
+            ->map(fn (Account $account): array => [
+                'account_uuid' => $account->account_uuid,
+                'name' => $account->name,
+            ])
+            ->all();
+    }
 }

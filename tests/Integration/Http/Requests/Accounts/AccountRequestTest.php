@@ -17,6 +17,15 @@ it('有効な入力値はバリデーションを通過する', function () {
     expect($validator->passes())->toBeTrue();
 });
 
+it('name が 100 文字ちょうどの場合はバリデーションを通過する', function () {
+    $validator = Validator::make(
+        validAccountInput(['name' => str_repeat('あ', 100)]),
+        (new AccountRequest)->rules()
+    );
+
+    expect($validator->passes())->toBeTrue();
+});
+
 it('不正な入力値はバリデーションエラーになる', function (array $input, array $expectedErrorKeys) {
     $validator = Validator::make($input, (new AccountRequest)->rules());
 

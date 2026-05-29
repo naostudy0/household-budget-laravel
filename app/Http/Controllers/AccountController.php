@@ -18,7 +18,7 @@ class AccountController extends Controller
     public function index(AccountIndexQuery $query): Response
     {
         return Inertia::render('Accounts/Index', [
-            'accounts' => $query->execute(Auth::user())->values(),
+            'accounts' => $query->execute(Auth::id())->values(),
         ]);
     }
 

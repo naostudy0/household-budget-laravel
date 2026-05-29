@@ -64,6 +64,72 @@ it('他ユーザーの会計単位編集画面は表示できない', function (
         ->assertForbidden();
 });
 
+it('所有者は自分の会計単位詳細を表示できる', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create([
+        'user_id' => $user->getKey(),
+        'name' => '個人用',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('accounts.show', $account, false))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Accounts/Show')
+            ->where('account.account_uuid', $account->account_uuid)
+            ->where('account.name', '個人用'));
+});
+
+it('所有者は自分の会計単位編集画面を表示できる', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create([
+        'user_id' => $user->getKey(),
+        'name' => '生活費',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('accounts.edit', $account, false))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Accounts/Edit')
+            ->where('account.account_uuid', $account->account_uuid)
+            ->where('account.name', '生活費'));
+});
+
+it('所有者は自分の会計単位を更新できる', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create([
+        'user_id' => $user->getKey(),
+        'name' => '更新前',
+    ]);
+
+    $this->actingAs($user)
+        ->put(route('accounts.update', $account, false), [
+            'name' => '更新後',
+        ])
+        ->assertRedirect(route('accounts.show', $account, false));
+
+    $this->assertDatabaseHas('accounts', [
+        'account_id' => $account->account_id,
+        'name' => '更新後',
+    ]);
+});
+
+it('所有者は自分の会計単位を削除できる', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create([
+        'user_id' => $user->getKey(),
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('accounts.destroy', $account, false))
+        ->assertRedirect(route('accounts.index', absolute: false));
+
+    $this->assertDatabaseMissing('accounts', [
+        'account_id' => $account->account_id,
+    ]);
+});
+
 it('他ユーザーの会計単位は更新できない', function () {
     $user = User::factory()->create();
     $otherAccount = Account::factory()->create([

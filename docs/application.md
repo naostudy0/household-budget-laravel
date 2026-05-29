@@ -54,7 +54,11 @@ Application 層や Http 層から Eloquent Repository 実装クラスを直接�
 
 一覧、検索、表示用集計などの表示専用の読み取り処理は Query に分離してよい。
 
-Query は読み取り最適化を目的とするため、Application 層から必要に応じて Eloquent / Query Builder を直接使ってよい。
+Application 層の Query は、Controller や画面が必要とする DTO または読み取りモデルを返す。
+
+Application 層の Query は Eloquent Model や Query Builder に直接依存しない。
+
+Eloquent / Query Builder による読み取り最適化が必要な場合、その詳細は Infrastructure 層の実装に閉じ込め、Application 層は interface と DTO / 読み取りモデルに依存する。
 
 状態変更を伴う処理は Query に置かず、UseCase に置く。
 

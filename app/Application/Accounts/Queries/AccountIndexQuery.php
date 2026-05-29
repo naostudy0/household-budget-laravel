@@ -2,24 +2,21 @@
 
 namespace App\Application\Accounts\Queries;
 
-use App\Infrastructure\Persistence\Eloquent\Models\Account;
-use App\Models\User;
+use App\Domain\Accounts\Repositories\AccountRepositoryInterface;
 use Illuminate\Support\Collection;
 
 class AccountIndexQuery
 {
+    public function __construct(
+        private readonly AccountRepositoryInterface $accountRepository
+    ) {
+    }
+
     /**
      * @return Collection<int, array{account_uuid: string, name: string}>
      */
-    public function execute(User $user): Collection
+    public function execute(int $userId): Collection
     {
-        return Account::query()
-            ->where('user_id', $user->getKey())
-            ->orderBy('account_id')
-            ->get(['account_uuid', 'name'])
-            ->map(fn (Account $account): array => [
-                'account_uuid' => $account->account_uuid,
-                'name' => $account->name,
-            ]);
+        return collect($this->accountRepository->findSummariesByUserId($userId));
     }
 }
