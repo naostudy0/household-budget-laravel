@@ -50,11 +50,31 @@ Policy は Laravel の自動検出を優先する。
 
 DDD のディレクトリ構成やモデル配置の都合で自動検出が分かりにくくなる場合のみ、`AppServiceProvider` などで明示的に登録する。
 
+## Policy の登録
+
+Eloquent Model を `app/Models` ではなく `app/Infrastructure/Persistence/Eloquent/Models` に置く場合、Laravel の Policy 自動検出に頼ると対応関係が分かりにくくなる。
+
+そのため、対象 Model と Policy の対応は `AppServiceProvider` で明示的に登録する。
+
+```php
+Gate::policy(Account::class, AccountPolicy::class);
+```
+
+この登録は、DDD のレイヤー分離により Laravel 標準の配置から外れる部分を補うためのものとする。
+
 ## Controller での認可
 
 状態変更や詳細表示を行う Controller では、UseCase / Query を呼び出す前に認可を確認する。
 
-認可確認は Laravel 標準の `$this->authorize()` を優先して使う。
+認可確認は `Gate::authorize()` を使う。
+
+```php
+Gate::authorize('update', $account);
+```
+
+基底 `Controller` に `AuthorizesRequests` を持たせて `$this->authorize()` を使う形にはしない。
+
+認可が必要な Controller だけで `Gate` を明示的に利用することで、基底 Controller に不要な責務を増やさず、認可への依存を対象 Controller に閉じ込める。
 
 Controller は認可確認、Request の受け取り、UseCase / Query の呼び出し、レスポンス返却に集中する。
 
