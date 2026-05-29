@@ -10,6 +10,10 @@ const props = defineProps({
 });
 
 const destroy = () => {
+  if (!window.confirm('このアカウントを削除しますか？')) {
+    return;
+  }
+
   router.delete(route('accounts.destroy', props.account.account_uuid));
 };
 </script>
